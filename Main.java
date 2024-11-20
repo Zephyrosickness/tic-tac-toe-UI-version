@@ -1,11 +1,10 @@
 import java.awt.*;
-import java.util.Objects;
 import javax.swing.*;
 
-public class Main {
+public class Main{
     //init var
     private static final int BOARD_SIZE = 3;
-    private static final Cell[] board = new Cell[BOARD_SIZE][BOARD_SIZE];
+    private static final Cell[][] board = new Cell[BOARD_SIZE][BOARD_SIZE];
     private static Player currentTurn;
     private static Player[] players;
     private static JLabel currentTurnLabel;
@@ -13,50 +12,93 @@ public class Main {
     //inits all important stuff
     public static void main(String[] args){
         //inits players
-        boolean isPlaying = true;
         final Player player1 = new Player("Player 1", Color.RED, 0);
         final Player player2 = new Player("Player 2", Color.BLUE, 1);
         players = new Player[]{player1, player2};
-        currentTurn = player1;
-        currentTurn.id = 0;
 
         //ui management inits
         final int WINDOW_SIZE = 500;
         final int DISPLACEMENT = 15;
 
-        JFrame frame = new JFrame("tic tac toe");
-        frame.setSize(WINDOW_SIZE,WINDOW_SIZE+(int)((double)WINDOW_SIZE/3));
-        frame.setVisible(true);
+        JFrame gameFrame = new JFrame("tic tac toe");
+        gameFrame.setSize(WINDOW_SIZE,WINDOW_SIZE+(int)((double)WINDOW_SIZE/3));
 
         //the boxes go here
         JPanel cellPanel = new JPanel();
         cellPanel.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE));
         cellPanel.setBounds(DISPLACEMENT, DISPLACEMENT, WINDOW_SIZE-DISPLACEMENT*2, WINDOW_SIZE-DISPLACEMENT);
-        frame.add(cellPanel);
+        gameFrame.add(cellPanel);
 
         //the text (such as "player X's turn!") goes here
         JPanel consolePanel = new JPanel();
         consolePanel.setBounds(0, WINDOW_SIZE, WINDOW_SIZE, WINDOW_SIZE/6);
         consolePanel.setLayout(null);
-        frame.add(consolePanel);
+        gameFrame.add(consolePanel);
 
         //add label to display current player's turn here
-        currentTurnLabel = new JLabel(currentTurn.name+"'s turn!");
+        currentTurnLabel = new JLabel("PLACEHOLDER");
         currentTurnLabel.setBounds((int) (WINDOW_SIZE/2.75), WINDOW_SIZE, WINDOW_SIZE, WINDOW_SIZE/6);
         consolePanel.add(currentTurnLabel);
 
-        //add logic to change player names here
 
-        //inits all cells into board
-        int CELL_COUNT = (int) Math.pow(BOARD_SIZE, 2);
-        for(int pos = 0; pos < CELL_COUNT; pos++){new Cell(cellPanel, pos);}
-        cellPanel.repaint();
-        cellPanel.revalidate();
+        JFrame titleFrame = new JFrame("tic tac toe");
+        titleFrame.setResizable(false);
+        titleFrame.setSize((int) (((double) WINDOW_SIZE /2)*1.5), (int) (((double) WINDOW_SIZE /3)*1.5));
+        titleFrame.setVisible(true);
+
+        JPanel titlePanel = new JPanel();
+        titlePanel.setSize(titleFrame.getWidth(), titleFrame.getHeight());
+        titlePanel.setLayout(null);
+        titleFrame.add(titlePanel);
+
+        JLabel nameTitle = new JLabel("Tic-Tac-Toe (Swing Version)");
+        nameTitle.setBounds((titlePanel.getWidth()/2)-80, 0, 200,50);
+        titlePanel.add(nameTitle);
+
+        JButton playAgain = new JButton("Play!");
+        playAgain.setBounds((titlePanel.getWidth()/2)-50, 50, 100, 50);
+        titlePanel.add(playAgain);
+
+        playAgain.addActionListener(e -> {
+            cellPanel.removeAll();
+            for(int row = 0; row < BOARD_SIZE; row++){for(int col = 0; col<BOARD_SIZE; col++){new Cell(cellPanel, row, col);}}
+            //inits all cells into board
+            currentTurn = players[0];
+            currentTurnLabel.setText(currentTurn.name+"'s turn!");
+            cellPanel.repaint();
+            cellPanel.revalidate();
+
+            gameFrame.setVisible(true);
+
+        });
+
+
+    }
+
+    private static void turnAdvancement(){
+        int playerID = currentTurn.id+1;
+        if(playerID>=2){playerID = 0;}
+
+
+        if(winCheck(currentTurn)){currentTurnLabel.setText(currentTurn.name+" won!");
+        }else{
+            currentTurnLabel.setText(currentTurn.name+"'s turn!");
+            currentTurn = players[playerID];
+        }
     }
 
     //checks for horizontal win
     private static boolean horizontalWinCheck(Player player){
-        //for(Cell[] i:board){if (Arrays.equals(i, new String[]{player.icon, player.icon, player.icon})){return true;}}
+        for(int row = 0; row<BOARD_SIZE; row++){
+            boolean win = true;
+            for(Cell[] col : board){
+                if(!col[row].field.getBackground().equals(player.color)){
+                    win = false;
+                    break;
+                }
+            }
+            if(win){return true;}
+        }
         return false;
     }
 
@@ -107,7 +149,20 @@ public class Main {
             }
         }
         return isTied;
-    }*/
+    }
+
+    private static boolean winCheck(Player player){
+        boolean horizontal = horizontalWinCheck(player);
+        boolean vertical = verticalWinCheck(player);
+        boolean diagonal = diagonalWinCheck(player);
+        boolean playerWon = horizontal||vertical||diagonal;
+        boolean tie = tieCheck();
+
+        if(horizontal||vertical||diagonal){System.out.println(player.name+" won!");
+        }else if(tie){System.out.println("Tie!");}
+
+        return tie||playerWon;
+    }
 
     private static class Player{
         String name;
@@ -123,16 +178,18 @@ public class Main {
     private static class Cell{
         boolean taken;
         JButton field = new JButton();
-        int pos;
+        int row;
+        int col;
 
-        private Cell(JPanel panel, int pos){
+        private Cell(JPanel panel, int row, int col){
             taken = false;
 
             field.setBackground(Color.WHITE);
             panel.add(field);
-            this.pos = pos;
+            this.row = row;
+            this.col = col;
 
-            board[pos] = this;
+            board[row][col] = this;
 
             field.addActionListener(e -> {setBackground();});
         }
@@ -144,14 +201,5 @@ public class Main {
                 turnAdvancement();
             }
         }
-    }
-
-    private static void turnAdvancement(){
-        int playerID = currentTurn.id+1;
-        if(playerID>=2){playerID = 0;}
-
-        currentTurn = players[playerID];
-
-        currentTurnLabel.setText(currentTurn.name+"'s turn!");
     }
 }
