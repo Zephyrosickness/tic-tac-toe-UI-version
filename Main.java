@@ -82,8 +82,8 @@ public class Main{
 
         if(winCheck(currentTurn)){currentTurnLabel.setText(currentTurn.name+" won!");
         }else{
-            currentTurnLabel.setText(currentTurn.name+"'s turn!");
             currentTurn = players[playerID];
+            currentTurnLabel.setText(currentTurn.name+"'s turn!");
         }
     }
 
@@ -128,7 +128,7 @@ public class Main{
             }
         }
         //checks if diagonal from right to left
-        for(int i = BOARD_SIZE-1; i>0;i--){
+        for(int i = BOARD_SIZE-1; i>=0;i--){
             if(!board[i][(BOARD_SIZE-1)-i].field.getBackground().equals(player.color)){
                 rightToLeft = false;
                 break;
@@ -160,6 +160,10 @@ public class Main{
 
         if(horizontal||vertical||diagonal){System.out.println(player.name+" won!");
         }else if(tie){System.out.println("Tie!");}
+
+        System.out.println(horizontal);
+        System.out.println(vertical);
+        System.out.println(diagonal);
 
         return tie||playerWon;
     }
