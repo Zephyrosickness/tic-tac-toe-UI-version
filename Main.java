@@ -161,10 +161,6 @@ public class Main{
         if(horizontal||vertical||diagonal){System.out.println(player.name+" won!");
         }else if(tie){System.out.println("Tie!");}
 
-        System.out.println(horizontal);
-        System.out.println(vertical);
-        System.out.println(diagonal);
-
         return tie||playerWon;
     }
 
